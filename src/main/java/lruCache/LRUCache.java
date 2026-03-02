@@ -31,24 +31,22 @@ public class LRUCache<Key, Value> implements Cache<Key,Value> {
     public boolean set(Key key, Value value) {
         this.lock.writeLock().lock();
         try{
-            CacheElement<Key, Value> item = new CacheElement<>(key, value);
-            LinkedListNode<CacheElement<Key,Value>> newNode;
+            LinkedListNode<CacheElement<Key, Value>> node = linkedListNodeMap.get(key);
 
-            if  (linkedListNodeMap.containsKey(key)){
-                LinkedListNode<CacheElement<Key, Value>> existingNode = this.linkedListNodeMap.get(key);
-                newNode = this.doublyLinkedList.updateAndMoveToFront(existingNode, item);
-            }else{
-                if (this.size() >= maxSize){
-                    evictElement();
-                }
-                newNode = this.doublyLinkedList.add(item);
+            if (node != null) {
+                node.getElement().setValue(value);
+                doublyLinkedList.moveToFront(node);
+                return true;
             }
 
-            if (newNode.isEmpty()){
-                return false;
+            if (size() >= maxSize) {
+                evictElement();
             }
 
-            this.linkedListNodeMap.put(key, newNode);
+            CacheElement<Key, Value> newElement = new CacheElement<>(key, value);
+            LinkedListNode<CacheElement<Key, Value>> newNode = doublyLinkedList.add(newElement);
+            linkedListNodeMap.put(key, newNode);
+
             return true;
         }finally {
             this.lock.writeLock().unlock();
@@ -82,12 +80,13 @@ public class LRUCache<Key, Value> implements Cache<Key,Value> {
         try{
             LinkedListNode<CacheElement<Key,Value>> node = this.linkedListNodeMap.get(key);
 
-            if (node != null && !node.isEmpty()){
-                this.linkedListNodeMap.put(key, doublyLinkedList.moveToFront(node));
-                return Optional.of(node.getElement().getValue());
+            if (node == null || node.isEmpty()){
+                return Optional.empty();
             }
 
-            return Optional.empty();
+            this.doublyLinkedList.moveToFront(node);
+
+            return Optional.of(node.getElement().getValue());
         }finally {
             this.lock.readLock().unlock();
         }

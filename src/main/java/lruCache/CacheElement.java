@@ -9,6 +9,14 @@ public class CacheElement<Key, Value> {
         this.value = value;
     }
 
+    public void setKey(Key key) {
+        this.key = key;
+    }
+
+    public void setValue(Value value) {
+        this.value = value;
+    }
+
     public Value getValue(){
         return value;
     }

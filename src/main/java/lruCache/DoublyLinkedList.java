@@ -55,16 +55,37 @@ public class DoublyLinkedList <T>{
             return dummyNode;
         }
 
-        detach(node);
-        return add(newElement);
+        node.setElement(newElement);
+        return this.moveToFront(node);
     }
 
     public LinkedListNode<T> moveToFront(LinkedListNode<T> node){
-        if (node.isEmpty()){
-            return dummyNode;
+        if (node.isEmpty() || node == this.head){
+            return node;
         }
 
-        return updateAndMoveToFront(node, node.getElement());
+        if (node.getPrev() != null){
+            node.getPrev().setNext(node.getNext());
+        }
+
+        if (node.getNext() != null){
+            node.getNext().setPrev(node.getPrev());
+        }
+
+        if (node == this.tail){
+            this.tail = node.getPrev();
+        }
+
+        node.setPrev(null);
+        node.setNext(this.head);
+
+        if (this.head == null){
+            this.head.setPrev(node);
+        }
+
+        this.head = node;
+
+        return node;
     }
 
 
