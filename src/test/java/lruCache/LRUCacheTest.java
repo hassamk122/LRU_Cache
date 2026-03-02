@@ -2,6 +2,11 @@ package lruCache;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class LRUCacheTest {
@@ -129,4 +134,26 @@ class LRUCacheTest {
     }
 
 
+    /**
+     * testing cache in concurrent env
+     */
+    @Test
+    void runMultithread_whenDataPut_thenNoDataLoss() throws Exception{
+        final int size = 50;
+        final ExecutorService executorService = Executors.newFixedThreadPool(5);
+        Cache<Integer, String> cache = new LRUCache<>(size);
+        CountDownLatch countDownLatch = new CountDownLatch(size);
+        try{
+            IntStream.range(0, size).<Runnable>mapToObj(key->()->{
+                cache.set(key, "value"+key);
+                countDownLatch.countDown();
+            }).forEach(executorService::submit);
+            countDownLatch.await();
+        }finally {
+            executorService.shutdown();
+        }
+
+        assertEquals(cache.size(),size);
+        IntStream.range(0, size).forEach(i->assertEquals("value"+i, cache.get(i).get()));
+    }
 }
