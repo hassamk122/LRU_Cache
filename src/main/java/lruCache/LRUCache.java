@@ -14,8 +14,8 @@ public class LRUCache<Key, Value> implements Cache<Key,Value> {
 
     public LRUCache(int maxSize){
         this.maxSize = maxSize;
-        this.linkedListNodeMap = new ConcurrentHashMap<>(maxSize);
-        this.doublyLinkedList = new DoublyLinkedList<>();
+        linkedListNodeMap = new ConcurrentHashMap<>(maxSize);
+        doublyLinkedList = new DoublyLinkedList<>();
     }
 
 
@@ -25,11 +25,10 @@ public class LRUCache<Key, Value> implements Cache<Key,Value> {
      * and move it to the front. On a cache miss we may
      * need to evict the lru element first if the cache is already at capacity,
      * then create and add the new node.  returns false only if the list
-     * operation itself returned an empty/dummy node.
      */
     @Override
     public boolean set(Key key, Value value) {
-        this.lock.writeLock().lock();
+        lock.writeLock().lock();
         try{
             LinkedListNode<CacheElement<Key, Value>> node = linkedListNodeMap.get(key);
 
@@ -49,7 +48,7 @@ public class LRUCache<Key, Value> implements Cache<Key,Value> {
 
             return true;
         }finally {
-            this.lock.writeLock().unlock();
+            lock.writeLock().unlock();
         }
     }
 
@@ -58,15 +57,15 @@ public class LRUCache<Key, Value> implements Cache<Key,Value> {
      * and the HashMap to free up space for a new entry.
      */
     private void evictElement(){
-        this.lock.writeLock().lock();
+        lock.writeLock().lock();
         try{
-            LinkedListNode<CacheElement<Key, Value>> lruNode = this.doublyLinkedList.removeLast();
+            LinkedListNode<CacheElement<Key, Value>> lruNode = doublyLinkedList.removeLast();
 
             if ( !lruNode.isEmpty()){
-                this.linkedListNodeMap.remove(lruNode.getElement().getKey());
+                linkedListNodeMap.remove(lruNode.getElement().getKey());
             }
         }finally {
-            this.lock.writeLock().unlock();
+            lock.writeLock().unlock();
         }
     }
 

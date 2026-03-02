@@ -5,21 +5,15 @@ public class LinkedListNode<T> {
     private T element;
     private LinkedListNode<T> next;
     private LinkedListNode<T> prev;
-    private DoublyLinkedList<T> listReference;
 
-    public DoublyLinkedList<T> getListReference() {
-        return listReference;
-    }
 
     public LinkedListNode(){
         this.element = null;
-        this.listReference = null;
     }
 
 
-    public LinkedListNode(T element, DoublyLinkedList<T> listReference) {
+    public LinkedListNode(T element) {
         this.element = element;
-        this.listReference = listReference;
     }
 
     public T getElement() {
@@ -40,10 +34,6 @@ public class LinkedListNode<T> {
 
     public void setPrev(LinkedListNode<T> prev) {
         this.prev = prev;
-    }
-
-    public void setListReference(DoublyLinkedList<T> listReference) {
-        this.listReference = listReference;
     }
 
     public LinkedListNode<T> getPrev() {
